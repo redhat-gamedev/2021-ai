@@ -1,65 +1,37 @@
-# 2021-ai
+# Shipwars Move Server
 
-## Create model Image  
-```
-make build
-make push
-```
+Used by the "agents" or "bots" to choose their next target.
 
-## Deployment  
-```
-oc create -f https://raw.githubusercontent.com/rhdemo/2021-ai/master/install/deployment.yml
-oc new-app --template=demo-2021-ai
-```
+## Build, Run, and Push
 
-## cleanup
-```
-oc delete template demo-2021-ai
-oc delete all -l app=demo-2021-ai
-oc delete route demo-2021-ai
+Use the included script to invoke Source-to-Image:
+
+```bash
+# Optional environment variables that can be passed to the build
+export QUAY_USER=yourusername
+export IMAGE_TAG=latest
+export IMAGE_REPOSITORY=quay.io/$QUAY_USER/shipwars-move-server
+
+# Builds the image as quay.io/$QUAY_USER/shipwars-move-server:latest
+./scripts/build.sh
 ```
 
+Run the image using the following command. You can visit http://localhost:8080
+to verify the service is running.
 
---
-
-
-
-## Deploy 
-```
-▶ oc new-app https://github.com/rhdemo/2021-ai.git -l name=demo-2021-ai --name=demo-2021-ai
+```bash
+docker run --rm -p 8080:8080 quay.io/$QUAY_USER/shipwars-move-server:latest
 ```
 
-```
-▶ oc expose svc/demo-2021-ai -l name=demo-2021-ai
-route.route.openshift.io/demo-2021-ai exposed
+To obtain a sample prediction use this command from the root of the repository:
+
+```bash
+curl -X POST -H "Content-Type: application/json" -d @data.json http://localhost:8080/prediction
 ```
 
-```
-▶ oc get routes
-NAME     HOST/PORT                                                   PATH   SERVICES   PORT       TERMINATION   WILDCARD
-demo-2021-ai   demo-2021-ai-test.apps.rhods-internal.openshiftapps.com          demo-2021-ai     8080-tcp                 None
+Push to quay.io using this command:
+
+```bash
+docker push quay.io/$QUAY_USER/shipwars-move-server:latest
 ```
 
-```
-▶ curl http://demo-2021-ai-test.apps.rhods-internal.ju9j.p1.openshiftapps.com/status
-{"status":"ok"}
-```
-
-## Predict 
-```
-//1 - MISS
-//2 - HIT
-//-1 - unplayed
-▶ curl -X POST -H "Content-Type: application/json" -d @data.json http://demo-2021-ai-test.apps.rhods-internal.ju9j.p1.openshiftapps.com/prediction
-{"prob":[[8,11,12,11,8],[11,14,15,14,11],[12,15,16,15,12],[11,14,15,14,11],[8,11,12,11,8]],"x":2,"y":2}
-```
-
-## Update code 
-```
-▶ oc start-build demo-2021-ai
-```
-
-## Cleanup 
-```
-▶ oc delete all -l name=demo-2021-ai
-```
